@@ -1,24 +1,36 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {useQuery} from 'react-query';
 import stocksApi from '../../api/stocksApi.js';
+
+import { filterStocks } from '../../helpers/filterStocks.js';
 
 import style from './style.module.css';
 
 export default function SerchStocks() {
   const { data } = useQuery("getStocks", () => stocksApi["getStocks"]());
   const [value, setValue] = useState('');
-  const [stocks, setStocks] = useState([])
+  const [stocks, setStocks] = useState([]);
+  const [focus, setForus] = useState(false);
+
+  const autocompleteRef = useRef(null);
 
   useEffect(() => {
     if (!data) return;
 
-      const filteredStocks = data.filter(stock => {
+    const filteredStocks = filterStocks(data, value);
 
-        return stock.description.toLowerCase().includes(value.toLocaleLowerCase())
-      }).slice(0, 9)
-
-      setStocks(filteredStocks)
+    setStocks(filteredStocks);
   }, [data, value])
+
+  const onBlurHendel = (e) => {
+    setTimeout(() => {
+      if(autocompleteRef.current && !autocompleteRef.current.contains(e.target)) {
+        setForus(false)
+      }
+
+      console.log(autocompleteRef.current, e.target);
+    }, 100)
+  }
 
 
   return (
@@ -27,14 +39,16 @@ export default function SerchStocks() {
       className={style.input} 
       value={value} 
       onChange={(e) => setValue(e.target.value)} 
+      onFocus={() => setForus(true)}
+      onBlur={onBlurHendel}
       type="text" />
 
-      <ul className={style.autocomplete}>
+     { focus && stocks.length > 0 ? <ul className={style.autocomplete}>
         { stocks.map(stock => {
-            return <li className={style.item} key={stock.figi}>{stock.symbol}</li>
-          })
+            return <li ref={autocompleteRef} onClick={() => console.log(stock.symbol)} className={style.item} key={stock.figi}>{stock.symbol}</li>
+          }) 
         }
-      </ul>
+      </ul> : null}
     </div>
   )
 }
