@@ -8,7 +8,11 @@ const stockApi = {
     const response = await axios.get(`${BASE_URL}/stock/symbol?exchange=US&token=${API_KEY}`);
     
     return response.data;
-  }
+  },
+  getProfile: (symbol) =>
+    axios.get(`${BASE_URL}/stock/profile2?symbol=${symbol}&token=${API_KEY}`),
+  getPrice: (symbol) =>
+    axios.get(`${BASE_URL}/quote?symbol=${symbol}&token=${API_KEY}`),
 }
 
 

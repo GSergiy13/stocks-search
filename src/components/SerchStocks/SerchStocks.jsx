@@ -6,11 +6,11 @@ import { filterStocks } from '../../helpers/filterStocks.js';
 
 import style from './style.module.css';
 
-export default function SerchStocks() {
+export default function SerchStocks({addSToFavorites}) {
   const { data } = useQuery("getStocks", () => stocksApi["getStocks"]());
   const [value, setValue] = useState('');
   const [stocks, setStocks] = useState([]);
-  const [focus, setForus] = useState(false);
+  const [focus, setFocus] = useState(false);
 
   const autocompleteRef = useRef(null);
 
@@ -22,30 +22,44 @@ export default function SerchStocks() {
     setStocks(filteredStocks);
   }, [data, value])
 
-  const onBlurHendel = (e) => {
+  const onBlurHandler = (e) => {
     setTimeout(() => {
-      if(autocompleteRef.current && !autocompleteRef.current.contains(e.target)) {
-        setForus(false)
+      if (
+        autocompleteRef.current &&
+        !autocompleteRef.current.contains(e.target)
+      ) {
+        setFocus(false);
       }
+    }, 100);
+  };
 
-      console.log(autocompleteRef.current, e.target);
-    }, 100)
+
+  const selectStock = (stock) => {
+    setValue(stock.description)
+    addSToFavorites(stock)
   }
+
 
 
   return (
     <div className={style.searchBlock}>
-      <input 
-      className={style.input} 
-      value={value} 
-      onChange={(e) => setValue(e.target.value)} 
-      onFocus={() => setForus(true)}
-      onBlur={onBlurHendel}
-      type="text" />
+      <div className={style.inputContainer}>
+        <input 
+        className={style.input} 
+        value={value} 
+        onChange={(e) => setValue(e.target.value)} 
+        onFocus={() => setFocus(true)}
+        onBlur={onBlurHandler}
+        type="text" />
 
-     { focus && stocks.length > 0 ? <ul className={style.autocomplete}>
+        <span onClick={() => setValue('')}>
+          x
+        </span>
+      </div>
+
+     { focus && stocks.length ? <ul ref={autocompleteRef} className={style.autocomplete}>
         { stocks.map(stock => {
-            return <li ref={autocompleteRef} onClick={() => console.log(stock.symbol)} className={style.item} key={stock.figi}>{stock.symbol}</li>
+            return <li onClick={() => selectStock(stock)} className={style.item} key={stock.figi}>{stock.symbol}</li>
           }) 
         }
       </ul> : null}

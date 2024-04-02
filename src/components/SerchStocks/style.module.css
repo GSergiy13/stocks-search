@@ -41,3 +41,13 @@
   cursor: pointer;
   background-color: rgb(206, 206, 206);
 }
+
+
+
+
+.inputContainer {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
